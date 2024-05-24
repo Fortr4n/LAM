@@ -29,8 +29,8 @@ The R1 sparked a lot of discussion, but some might say it was more like a baby b
 ## What You'll Find Here:
 
 - Code
-- Docs
-- Comparisons of the R1 to the LAM we all know it could be. (Don't worry, we'll be gentle...ish).
+- Docs (when I get to it)
+- Comparisons of the R1 to the LAM we all know it could be. (Don't worry, we'll be gentle...ish and also when I get to it).
 
 ## Let's Hop to It!
 
