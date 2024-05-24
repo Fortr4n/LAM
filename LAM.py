@@ -8,6 +8,7 @@ import soundfile as sf
 import sounddevice as sd
 import pyttsx3
 import torch
+import torch_directml
 import numpy as np
 from bindsnet.network import Network
 from bindsnet.network.nodes import Input
@@ -20,20 +21,23 @@ from sklearn.linear_model import LinearRegression
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Initialize DirectML device
+dml = torch_directml.device()
+
 # Initialize Text-to-Speech (TTS) engine
 tts_engine = pyttsx3.init()
 
-# Load the tokenizer and model for text generation
+# Load the tokenizer and model for text generation using DirectML
 text_tokenizer = AutoTokenizer.from_pretrained("bigscience/bloomz")
-text_model = AutoModelForCausalLM.from_pretrained("bigscience/bloomz")
+text_model = AutoModelForCausalLM.from_pretrained("bigscience/bloomz").to(dml)
 
-# Load the processor and model for ASR
+# Load the processor and model for ASR using DirectML
 speech_processor = AutoProcessor.from_pretrained("openai/whisper-large-v3")
-speech_model = AutoModelForSpeechSeq2Seq.from_pretrained("openai/whisper-large-v3")
+speech_model = AutoModelForSpeechSeq2Seq.from_pretrained("openai/whisper-large-v3").to(dml)
 
-# Load the emotion recognition model
+# Load the emotion recognition model using DirectML
 emotion_tokenizer = AutoTokenizer.from_pretrained("arpanghoshal/EmoRoBERTa")
-emotion_model = AutoModelForSequenceClassification.from_pretrained("arpanghoshal/EmoRoBERTa")
+emotion_model = AutoModelForSequenceClassification.from_pretrained("arpanghoshal/EmoRoBERTa").to(dml)
 
 # Initialize homomorphic encryption
 public_key, private_key = paillier.generate_paillier_keypair()
@@ -45,7 +49,7 @@ class IzhikevichNodes(torch.nn.Module):
     def __init__(self, n):
         super().__init__()
         self.n = n
-        self.v = -65.0 * torch.ones(n)
+        self.v = -65.0 * torch.ones(n, device=dml)
         self.u = self.v * 0.2
         self.a = 0.02
         self.b = 0.2
@@ -86,7 +90,7 @@ class LAM:
         izhikevich_layer = IzhikevichNodes(n=100)
 
         # Connect input to Izhikevich neurons
-        connection = Connection(source=input_layer, target=izhikevich_layer, w=0.05 * torch.randn(input_layer.n, izhikevich_layer.n))
+        connection = Connection(source=input_layer, target=izhikevich_layer, w=0.05 * torch.randn(input_layer.n, izhikevich_layer.n, device=dml))
 
         # Add layers and connections to the network
         network.add_layer(input_layer, name="Input")
@@ -105,7 +109,7 @@ class LAM:
             self.network.reset_state_variables()
 
             # Create input spikes (binary)
-            spikes = torch.bernoulli(input_value * torch.ones(100)).byte()
+            spikes = torch.bernoulli(input_value * torch.ones(100, device=dml)).byte()
 
             # Run the network
             self.network.run(inputs={"Input": spikes}, time=100)
@@ -177,7 +181,7 @@ class LAM:
 
     def generate_response(self, prompt):
         try:
-            inputs = text_tokenizer(prompt, return_tensors="pt")
+            inputs = text_tokenizer(prompt, return_tensors="pt").to(dml)
             outputs = text_model.generate(inputs.input_ids, max_length=50)
             response = text_tokenizer.decode(outputs[0], skip_special_tokens=True)
             return response
@@ -188,7 +192,7 @@ class LAM:
     def transcribe_audio(self, audio_path):
         try:
             speech_array, _ = sf.read(audio_path)
-            inputs = speech_processor(speech_array, sampling_rate=16000, return_tensors="pt")
+            inputs = speech_processor(speech_array, sampling_rate=16000, return_tensors="pt").to(dml)
             generated_ids = speech_model.generate(inputs.input_ids)
             transcription = speech_processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
             return transcription
@@ -211,9 +215,9 @@ class LAM:
 
     def recognize_emotion(self, text):
         try:
-            inputs = emotion_tokenizer(text, return_tensors="pt")
+            inputs = emotion_tokenizer(text, return_tensors="pt").to(dml)
             outputs = emotion_model(**inputs)
-            scores = outputs.logits[0].detach().numpy()
+            scores = outputs.logits[0].detach().cpu().numpy()
             emotions = ['anger', 'disgust', 'fear', 'joy', 'neutral', 'sadness', 'surprise']
             emotion = emotions[np.argmax(scores)]
             return emotion
@@ -223,7 +227,7 @@ class LAM:
 
     def process_task_with_bindsnet(self, task):
         try:
-            input_value = torch.tensor([len(task)]).float() / 10  # Normalize input
+            input_value = torch.tensor([len(task)]).float().to(dml) / 10  # Normalize input
             spikes = self.simulate_bindsnet_model(input_value)
             if spikes is not None:
                 spike_count = spikes.sum().item()
