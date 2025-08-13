@@ -1,18 +1,32 @@
 # agent.py
-import os
+import logging
 from LAM import LAM
-from apis.doordash_api import DoorDashAPI
-from apis.uber_api import UberAPI
-from apis.expedia_api import ExpediaAPI
-from apis.plaid_api import PlaidAPI
+from API.Doordash import DoorDashAPI
+from API.Uber import UberAPI
+from API.Expedia import ExpediaAPI
+from API.Plaid import PlaidAPI
+from config import Config
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
 
 class Agent(LAM):
     def __init__(self, name):
         super().__init__(name)
-        self.doordash_api = DoorDashAPI(api_key=os.getenv('DOORDASH_API_KEY'))
-        self.uber_api = UberAPI(api_key=os.getenv('UBER_API_KEY'))
-        self.expedia_api = ExpediaAPI(api_key=os.getenv('EXPEDIA_API_KEY'))
-        self.plaid_api = PlaidAPI(client_id=os.getenv('PLAID_CLIENT_ID'), secret=os.getenv('PLAID_SECRET'))
+        self.doordash_api = DoorDashAPI(
+            api_key=Config.DOORDASH_API_KEY
+        )
+        self.uber_api = UberAPI(
+            api_key=Config.UBER_API_KEY
+        )
+        self.expedia_api = ExpediaAPI(
+            api_key=Config.EXPEDIA_API_KEY
+        )
+        self.plaid_api = PlaidAPI(
+            client_id=Config.PLAID_CLIENT_ID,
+            secret=Config.PLAID_SECRET
+        )
 
     def order_food(self, location):
         try:
@@ -24,7 +38,9 @@ class Agent(LAM):
 
     def request_ride(self, start_lat, start_lng, end_lat, end_lng):
         try:
-            estimates = self.uber_api.get_ride_estimates(start_lat, start_lng, end_lat, end_lng)
+            estimates = self.uber_api.get_ride_estimates(
+                start_lat, start_lng, end_lat, end_lng
+            )
             print("Ride estimates:", estimates)
             # Add logic to request ride...
         except Exception as e:
@@ -32,7 +48,9 @@ class Agent(LAM):
 
     def search_and_book_hotel(self, destination, checkin_date, checkout_date):
         try:
-            hotels = self.expedia_api.search_hotels(destination, checkin_date, checkout_date)
+            hotels = self.expedia_api.search_hotels(
+                destination, checkin_date, checkout_date
+            )
             print("Available hotels:", hotels)
             # Add logic to book hotel...
         except Exception as e:
