@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAM Dashboard - Large Action Model</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        .main-content {
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+        .card-header {
+            background: white;
+            border-bottom: 1px solid #e9ecef;
+            border-radius: 12px 12px 0 0 !important;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-online { background: #28a745; }
+        .status-offline { background: #dc3545; }
+        .chat-message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .chat-user { background: #e3f2fd; }
+        .chat-ai { background: #f3e5f5; }
+        .task-item {
+            padding: 10px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin: 5px 0;
+            background: white;
+        }
+        .priority-high { border-left: 4px solid #dc3545; }
+        .priority-medium { border-left: 4px solid #ffc107; }
+        .priority-low { border-left: 4px solid #28a745; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar p-3">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-robot fa-2x mb-2"></i>
+                        <h5>LAM Dashboard</h5>
+                        <small class="text-muted">Large Action Model</small>
+                    </div>
+                    
+                    <nav class="nav flex-column">
+                        <a class="nav-link active" href="#overview" data-bs-toggle="tab">
+                            <i class="fas fa-tachometer-alt me-2"></i>Overview
+                        </a>
+                        <a class="nav-link" href="#tasks" data-bs-toggle="tab">
+                            <i class="fas fa-tasks me-2"></i>Task Management
+                        </a>
+                        <a class="nav-link" href="#ai-chat" data-bs-toggle="tab">
+                            <i class="fas fa-comments me-2"></i>AI Chat
+                        </a>
+                        <a class="nav-link" href="#food-delivery" data-bs-toggle="tab">
+                            <i class="fas fa-utensils me-2"></i>Food Delivery
+                        </a>
+                        <a class="nav-link" href="#transportation" data-bs-toggle="tab">
+                            <i class="fas fa-car me-2"></i>Transportation
+                        </a>
+                        <a class="nav-link" href="#analytics" data-bs-toggle="tab">
+                            <i class="fas fa-chart-line me-2"></i>Analytics
+                        </a>
+                        <a class="nav-link" href="#settings" data-bs-toggle="tab">
+                            <i class="fas fa-cog me-2"></i>Settings
+                        </a>
+                    </nav>
+                    
+                    <div class="mt-auto pt-4">
+                        <div class="text-center">
+                            <div class="status-indicator status-online"></div>
+                            <small>System Online</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="main-content p-4">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 id="page-title">Dashboard Overview</h2>
+                        <div class="d-flex align-items-center">
+                            <span class="me-3">
+                                <i class="fas fa-user me-2"></i>Welcome, User
+                            </span>
+                            <a href="/" class="btn btn-outline-secondary">
+                                <i class="fas fa-home me-2"></i>Home
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- Overview Tab -->
+                        <div class="tab-pane fade show active" id="overview">
+                            <div class="row">
+                                <div class="col-md-6 col-lg-3 mb-4">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <i class="fas fa-tasks fa-2x text-primary mb-2"></i>
+                                            <h5 class="card-title">Active Tasks</h5>
+                                            <h3 id="task-count">0</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-4">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <i class="fas fa-brain fa-2x text-success mb-2"></i>
+                                            <h5 class="card-title">AI Status</h5>
+                                            <h3 id="ai-status">Online</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-4">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <i class="fas fa-utensils fa-2x text-warning mb-2"></i>
+                                            <h5 class="card-title">Food APIs</h5>
+                                            <h3 id="food-status">Ready</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-3 mb-4">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <i class="fas fa-car fa-2x text-info mb-2"></i>
+                                            <h5 class="card-title">Transport</h5>
+                                            <h3 id="transport-status">Ready</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-8 mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Recent Activity</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="activity-log">
+                                                <p class="text-muted">No recent activity</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Quick Actions</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="d-grid gap-2">
+                                                <button class="btn btn-primary" onclick="showTab('tasks')">
+                                                    <i class="fas fa-plus me-2"></i>Add Task
+                                                </button>
+                                                <button class="btn btn-outline-primary" onclick="showTab('ai-chat')">
+                                                    <i class="fas fa-comment me-2"></i>Chat with AI
+                                                </button>
+                                                <button class="btn btn-outline-primary" onclick="showTab('food-delivery')">
+                                                    <i class="fas fa-utensils me-2"></i>Order Food
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Task Management Tab -->
+                        <div class="tab-pane fade" id="tasks">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Task Management</h5>
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                                        <i class="fas fa-plus me-2"></i>Add Task
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div id="tasks-list">
+                                        <p class="text-muted">No tasks found</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Chat Tab -->
+                        <div class="tab-pane fade" id="ai-chat">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">AI Chat Assistant</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="chat-messages" class="mb-3" style="height: 300px; overflow-y: auto;">
+                                        <div class="chat-message chat-ai">
+                                            <strong>LAM:</strong> Hello! I'm your AI assistant. How can I help you today?
+                                        </div>
+                                    </div>
+                                    <div class="input-group">
+                                        <input type="text" id="chat-input" class="form-control" placeholder="Type your message...">
+                                        <button class="btn btn-primary" onclick="sendChatMessage()">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Food Delivery Tab -->
+                        <div class="tab-pane fade" id="food-delivery">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Food Delivery</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <input type="text" id="food-location" class="form-control" placeholder="Location">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" id="food-cuisine" class="form-control" placeholder="Cuisine (optional)">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-primary w-100" onclick="searchFood()">
+                                                <i class="fas fa-search me-2"></i>Search
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div id="food-results"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transportation Tab -->
+                        <div class="tab-pane fade" id="transportation">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Transportation</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-md-3">
+                                            <input type="text" id="start-lat" class="form-control" placeholder="Start Lat">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="text" id="start-lng" class="form-control" placeholder="Start Lng">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="text" id="end-lat" class="form-control" placeholder="End Lat">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="text" id="end-lng" class="form-control" placeholder="End Lng">
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary" onclick="getRideEstimate()">
+                                        <i class="fas fa-car me-2"></i>Get Ride Estimate
+                                    </button>
+                                    <div id="ride-results" class="mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Tab -->
+                        <div class="tab-pane fade" id="analytics">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Analytics & Insights</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6>Predictive Analytics</h6>
+                                            <button class="btn btn-outline-primary" onclick="runPredictiveAnalytics()">
+                                                <i class="fas fa-chart-line me-2"></i>Run Analysis
+                                            </button>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>Neural Network Processing</h6>
+                                            <div class="input-group">
+                                                <input type="text" id="neural-task" class="form-control" placeholder="Enter task to process">
+                                                <button class="btn btn-outline-primary" onclick="processNeuralTask()">
+                                                    <i class="fas fa-brain"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="analytics-results" class="mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Settings Tab -->
+                        <div class="tab-pane fade" id="settings">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Settings & Configuration</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6>Context Settings</h6>
+                                            <div class="mb-3">
+                                                <label class="form-label">Location</label>
+                                                <input type="text" id="context-location" class="form-control" placeholder="Your location">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Time Zone</label>
+                                                <input type="text" id="context-time" class="form-control" placeholder="Time zone">
+                                            </div>
+                                            <button class="btn btn-primary" onclick="updateContext()">
+                                                <i class="fas fa-save me-2"></i>Update Context
+                                            </button>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>System Status</h6>
+                                            <div id="system-status"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Task Modal -->
+    <div class="modal fade" id="addTaskModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Task Description</label>
+                        <input type="text" id="task-description" class="form-control" placeholder="Enter task description">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Priority</label>
+                        <select id="task-priority" class="form-select">
+                            <option value="1">High</option>
+                            <option value="2" selected>Medium</option>
+                            <option value="3">Low</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Due in (hours)</label>
+                        <input type="number" id="task-due-hours" class="form-control" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addTask()">Add Task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            setupTabNavigation();
+        });
+
+        // Tab navigation
+        function setupTabNavigation() {
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = this.getAttribute('href').substring(1);
+                    showTab(target);
+                    
+                    // Update active state
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-pane').forEach(tab => {
+                tab.classList.remove('show', 'active');
+            });
+            
+            // Show target tab
+            const targetTab = document.getElementById(tabName);
+            if (targetTab) {
+                targetTab.classList.add('show', 'active');
+            }
+            
+            // Update page title
+            const titles = {
+                'overview': 'Dashboard Overview',
+                'tasks': 'Task Management',
+                'ai-chat': 'AI Chat Assistant',
+                'food-delivery': 'Food Delivery',
+                'transportation': 'Transportation',
+                'analytics': 'Analytics & Insights',
+                'settings': 'Settings & Configuration'
+            };
+            document.getElementById('page-title').textContent = titles[tabName] || 'Dashboard';
+        }
+
+        // Dashboard data loading
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                if (data.error) {
+                    console.error('Error loading dashboard data:', data.error);
+                    return;
+                }
+                
+                // Update dashboard elements
+                document.getElementById('task-count').textContent = data.task_count;
+                document.getElementById('ai-status').textContent = 'Online';
+                
+                // Load tasks
+                loadTasks();
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Task management
+        async function loadTasks() {
+            try {
+                const response = await fetch('/api/tasks');
+                const data = await response.json();
+                
+                if (data.error) {
+                    console.error('Error loading tasks:', data.error);
+                    return;
+                }
+                
+                const tasksList = document.getElementById('tasks-list');
+                if (data.tasks && data.tasks.length > 0) {
+                    tasksList.innerHTML = data.tasks.map(task => `
+                        <div class="task-item priority-${task.priority === 1 ? 'high' : task.priority === 2 ? 'medium' : 'low'}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Task ${task.id}</strong>
+                                    <span class="badge bg-${task.priority === 1 ? 'danger' : task.priority === 2 ? 'warning' : 'success'} ms-2">
+                                        Priority ${task.priority}
+                                    </span>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" onclick="removeTask(${task.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            ${task.due_time ? `<small class="text-muted">Due: ${new Date(task.due_time).toLocaleString()}</small>` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    tasksList.innerHTML = '<p class="text-muted">No tasks found</p>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+            }
+        }
+
+        async function addTask() {
+            const description = document.getElementById('task-description').value;
+            const priority = parseInt(document.getElementById('task-priority').value);
+            const dueHours = document.getElementById('task-due-hours').value;
+            
+            if (!description) {
+                alert('Please enter a task description');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        description,
+                        priority,
+                        due_hours: dueHours || null
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert('Error adding task: ' + data.error);
+                } else {
+                    alert('Task added successfully!');
+                    document.getElementById('addTaskModal').classList.remove('show');
+                    document.body.classList.remove('modal-open');
+                    document.querySelector('.modal-backdrop')?.remove();
+                    loadTasks();
+                    loadDashboardData();
+                }
+                
+            } catch (error) {
+                console.error('Error adding task:', error);
+                alert('Error adding task');
+            }
+        }
+
+        async function removeTask(taskId) {
+            if (!confirm('Are you sure you want to remove this task?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/tasks?id=${taskId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert('Error removing task: ' + data.error);
+                } else {
+                    alert('Task removed successfully!');
+                    loadTasks();
+                    loadDashboardData();
+                }
+                
+            } catch (error) {
+                console.error('Error removing task:', error);
+                alert('Error removing task');
+            }
+        }
+
+        // AI Chat
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            addChatMessage(message, 'user');
+            input.value = '';
+            
+            try {
+                const response = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    addChatMessage('Error: ' + data.error, 'ai');
+                } else {
+                    addChatMessage(data.response, 'ai');
+                }
+                
+            } catch (error) {
+                console.error('Error sending chat message:', error);
+                addChatMessage('Error: Could not connect to AI service', 'ai');
+            }
+        }
+
+        function addChatMessage(message, sender) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message chat-${sender}`;
+            messageDiv.innerHTML = `<strong>${sender === 'user' ? 'You' : 'LAM'}:</strong> ${message}`;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Food delivery
+        async function searchFood() {
+            const location = document.getElementById('food-location').value;
+            const cuisine = document.getElementById('food-cuisine').value;
+            
+            if (!location) {
+                alert('Please enter a location');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/food/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        location,
+                        cuisine: cuisine || null
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert('Error searching food: ' + data.error);
+                } else {
+                    displayFoodResults(data.restaurants);
+                }
+                
+            } catch (error) {
+                console.error('Error searching food:', error);
+                alert('Error searching for food');
+            }
+        }
+
+        function displayFoodResults(restaurants) {
+            const resultsDiv = document.getElementById('food-results');
+            if (restaurants && restaurants.length > 0) {
+                resultsDiv.innerHTML = restaurants.map(restaurant => `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title">${restaurant.name}</h6>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    ${restaurant.cuisine} • ${restaurant.rating}⭐ • ${restaurant.delivery_time} • ${restaurant.delivery_fee}
+                                </small>
+                            </p>
+                            <p class="card-text">${restaurant.address}</p>
+                            <button class="btn btn-sm btn-primary" onclick="viewRestaurant('${restaurant.id}')">
+                                View Menu
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                resultsDiv.innerHTML = '<p class="text-muted">No restaurants found</p>';
+            }
+        }
+
+        // Transportation
+        async function getRideEstimate() {
+            const startLat = document.getElementById('start-lat').value;
+            const startLng = document.getElementById('start-lng').value;
+            const endLat = document.getElementById('end-lat').value;
+            const endLng = document.getElementById('end-lng').value;
+            
+            if (!startLat || !startLng || !endLat || !endLng) {
+                alert('Please enter all coordinates');
+                return;
+            }
+            
+            // This would call the Uber API through the agent
+            document.getElementById('ride-results').innerHTML = 
+                '<p class="text-info">Ride estimation feature would be implemented here with real Uber API integration.</p>';
+        }
+
+        // Analytics
+        async function runPredictiveAnalytics() {
+            const historicalData = [[10, 50], [20, 100], [15, 75]]; // Sample data
+            
+            try {
+                const response = await fetch('/api/analytics/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ historical_data: historicalData })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert('Error running analytics: ' + data.error);
+                } else {
+                    document.getElementById('analytics-results').innerHTML = 
+                        `<div class="alert alert-success">${data.message} - Processed ${data.data_points} data points</div>`;
+                }
+                
+            } catch (error) {
+                console.error('Error running analytics:', error);
+                alert('Error running predictive analytics');
+            }
+        }
+
+        async function processNeuralTask() {
+            const task = document.getElementById('neural-task').value;
+            
+            if (!task) {
+                alert('Please enter a task to process');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/neural/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ task })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert('Error processing task: ' + data.error);
+                } else {
+                    document.getElementById('analytics-results').innerHTML = 
+                        `<div class="alert alert-info">Task processed: ${data.spike_count} neural spikes generated</div>`;
+                }
+                
+            } catch (error) {
+                console.error('Error processing neural task:', error);
+                alert('Error processing neural task');
+            }
+        }
+
+        // Context management
+        async function updateContext() {
+            const location = document.getElementById('context-location').value;
+            const time = document.getElementById('context-time').value;
+            
+            try {
+                const response = await fetch('/api/context', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        location: location || null,
+                        time: time || null
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert('Error updating context: ' + data.error);
+                } else {
+                    alert('Context updated successfully!');
+                }
+                
+            } catch (error) {
+                console.error('Error updating context:', error);
+                alert('Error updating context');
+            }
+        }
+
+        // Enter key support for chat
+        document.getElementById('chat-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendChatMessage();
+            }
+        });
+    </script>
+</body>
+</html>
