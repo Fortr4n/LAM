@@ -1,6 +1,6 @@
 # agent.py
 import os
-from lam import LAM
+from LAM import LAM
 from apis.doordash_api import DoorDashAPI
 from apis.uber_api import UberAPI
 from apis.expedia_api import ExpediaAPI
